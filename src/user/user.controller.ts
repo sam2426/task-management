@@ -4,22 +4,22 @@ import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
-    constructor(private readonly User: UserService) {}
+  constructor(private readonly User: UserService) {}
 
-    @Post('signup')
-    async signup(@Body() body: any, @Res({ passthrough: true }) response: Response) {
-        const dta: any = response.locals;
-        console.log(dta);
-        const result = this.User.createUserService(body);
-        return { status: 200, result };
-    }
+  @Post('signup')
+  async signup(@Body() body: any, @Res({ passthrough: true }) response: Response) {
+    const dta: any = response.locals;
+    console.log(dta);
+    const result = this.User.createUserService(body);
+    return { status: 200, result };
+  }
 
-    @Post('login')
-    async login() {}
+  @Post('login')
+  async login() {}
 
-    @Get('forgot-password/:email')
-    async checkEmail() {}
+  @Get('forgot-password/:email')
+  async checkEmail() {}
 
-    @Post('update-password')
-    async updatePassword() {}
+  @Post('update-password')
+  async updatePassword() {}
 }
