@@ -1,13 +1,17 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { TaskModule } from './task/task.module';
-import { CryptoService } from './common/helpers/crypto.service';
+import { AuthMiddleware, JwtService } from './common/helpers';
 
 @Module({
   imports: [UserModule, TaskModule],
   controllers: [AppController],
-  providers: [AppService, CryptoService],
+  providers: [AppService, JwtService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).exclude('user/signup', 'user/login', 'user/forgot-password/(.*)').forRoutes('*');
+  }
+}
