@@ -16,6 +16,7 @@ CREATE TABLE "Task" (
     "description" TEXT,
     "completed" BOOLEAN DEFAULT false,
     "ownerId" INTEGER NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "targetCompletionAt" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
