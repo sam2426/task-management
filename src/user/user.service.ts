@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/common/connection/prisma.service';
 import { CryptoService, JwtService } from 'src/common/helpers';
 
+const throwableErrorNames = ['PrismaClientValidationError'];
 @Injectable()
 export class UserService {
   constructor(
@@ -19,7 +20,7 @@ export class UserService {
     try {
       const user = await this.findUserService({ email: userData.email });
       if (user) {
-        throw new Error('User already registered.');
+        throw { status: HttpStatus.CONFLICT, error: 'User registeration failed.' };
       }
 
       const { passwordHash, salt } = await this.crypto.generateHash(userData.password);
@@ -31,7 +32,7 @@ export class UserService {
       await this.prisma.user.create({ data: finalUserData });
       return 'User Registered Successfully.';
     } catch (error) {
-      throw new Error('User registeration failed.');
+      throw { status: HttpStatus.INTERNAL_SERVER_ERROR, error: 'User registeration failed.' };
     }
   }
 
@@ -39,15 +40,18 @@ export class UserService {
     try {
       const user = await this.findUserService({ email });
       if (user === null) {
-        throw new Error('Unregistered user.');
+        throw { status: HttpStatus.NOT_FOUND, error: 'Unregistered user.' };
       }
       const isCorrectPassword = await this.crypto.checkPassword(password, user.password, user.salt);
-      if (!isCorrectPassword) throw new Error('Incorrect Password.');
+      if (!isCorrectPassword) throw { status: HttpStatus.BAD_REQUEST, error: 'Incorrect Password.' };
       const token = await this.jwt.generateToken({ id: user.id, email: user.email }, 'UT');
       //   return 'Login successful';
       return token;
     } catch (error) {
-      throw new Error('Login failed.');
+      if ('status' in error) {
+        throw error;
+      }
+      throw { status: HttpStatus.BAD_REQUEST, error: 'Login failed.' };
     }
   }
 
@@ -55,21 +59,26 @@ export class UserService {
     try {
       const user = await this.findUserService({ email });
       if (user === null) {
-        throw new Error('Unregistered user.');
+        throw { status: HttpStatus.NOT_FOUND, error: 'Unregistered user.' };
       }
       const token = await this.jwt.generateToken({ id: user.id, email: user.email }, 'PT');
-      //   return 'Change Password Token sent.'
       return token;
     } catch (error) {
-      throw new Error('Request failed.');
+      if (error instanceof Error && throwableErrorNames.includes(error.name)) {
+        throw error;
+      }
+      if ('status' in error) {
+        throw error;
+      }
+      throw { status: HttpStatus.BAD_REQUEST, error: 'Request failed.' };
     }
   }
 
   async updatePassword(email: string, password: string): Promise<string> {
     try {
       const { passwordHash, salt } = await this.crypto.generateHash(password);
-      this.prisma.user.update({ data: { password: passwordHash, salt }, where: { email } });
-      return 'Password Updated.';
+      await this.prisma.user.update({ data: { password: passwordHash, salt }, where: { email } });
+      return 'Password updated successfully.';
     } catch (error) {
       throw new Error('Password update failed.');
     }
