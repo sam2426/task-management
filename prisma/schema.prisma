@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:secret@127.0.0.1:5432/task_management?schema=public"
+  url      = env("DATABASE_PRIVATE_URL")
 }
 
 model User {
@@ -26,6 +26,7 @@ model Task {
   completed           Boolean?  @default(false)
   owner               User      @relation(fields: [ownerId], references: [id])
   ownerId             Int
+  isDeleted           Boolean
   targetCompletionAt  DateTime  
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
