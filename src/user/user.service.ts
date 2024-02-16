@@ -17,6 +17,7 @@ export class UserService {
   }
 
   async createUserService(userData: Prisma.UserCreateInput): Promise<string> {
+    console.log(userData);
     try {
       const user = await this.findUserService({ email: userData.email });
       if (user) {
@@ -32,11 +33,12 @@ export class UserService {
       await this.prisma.user.create({ data: finalUserData });
       return 'User Registered Successfully.';
     } catch (error) {
+      console.log(error);
       throw { status: HttpStatus.INTERNAL_SERVER_ERROR, error: 'User registeration failed.' };
     }
   }
 
-  async checkEmailAndPassword(email: string, password: string): Promise<string> {
+  async checkEmailAndPassword(email: string, password: string): Promise<{ id: number; email: string; token: string }> {
     try {
       const user = await this.findUserService({ email });
       if (user === null) {
@@ -45,8 +47,7 @@ export class UserService {
       const isCorrectPassword = await this.crypto.checkPassword(password, user.password, user.salt);
       if (!isCorrectPassword) throw { status: HttpStatus.BAD_REQUEST, error: 'Incorrect Password.' };
       const token = await this.jwt.generateToken({ id: user.id, email: user.email }, 'UT');
-      //   return 'Login successful';
-      return token;
+      return { id: user.id, email: user.email, token };
     } catch (error) {
       if ('status' in error) {
         throw error;

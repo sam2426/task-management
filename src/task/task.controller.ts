@@ -31,8 +31,8 @@ type updateRequestDTO = {
 type whereCustomFilter = 'id' | 'title' | 'select' | 'sort' | 'page' | 'limit';
 @Controller('task')
 @ApiHeader({
-  name: 'bearerAuth',
-  description: 'Bearer Token',
+  name: 'bearerauth',
+  description: 'Bearer Token - add `Bearer` at start of token',
   required: true,
   schema: {
     type: 'string',
@@ -127,13 +127,13 @@ export class TaskController {
     return { message: data.length ? 'Tasks fetched' : 'Tasks not found.', data: { count: data.length, records: data } };
   }
 
-  @Get('search/:Id')
+  @Get('search/:id')
   @ApiParam({
     name: 'id',
     description: 'Task Id',
   })
   @ApiOperation({ summary: 'Get details of a single Task' })
-  async searchOne(@Param('Id') taskId: number, @Res({ passthrough: true }) response: Response): Promise<ResponseBody> {
+  async searchOne(@Param('id') taskId: string, @Res({ passthrough: true }) response: Response): Promise<ResponseBody> {
     const data = await this.Task.getTaskById(Number(taskId));
     response.status(HttpStatus.OK);
     return { message: 'Task Details', data };

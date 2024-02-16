@@ -17,7 +17,11 @@ export class UserController {
   constructor(private readonly User: UserService) {}
 
   @Post('signup')
-  @ApiOperation({ summary: 'register a user' })
+  @ApiOperation({
+    summary: 'Register a user',
+    description: `Create a new user in the database. email has to be unique.
+    The password is also stored in the db as encrypted code.`,
+  })
   @ApiBody(UserRegisterDTO)
   async signup(@Body() body: any, @Res({ passthrough: true }) response: Response): Promise<ResponseBody> {
     const result = await this.User.createUserService(body);
@@ -26,7 +30,10 @@ export class UserController {
   }
 
   @Post('login')
-  @ApiOperation({ summary: 'Login as a user' })
+  @ApiOperation({
+    summary: 'Login as a user',
+    description: 'Login using the email and the password. The token generated is valid for 1 day',
+  })
   @ApiBody(UserLoginDTO)
   async login(@Body() body: any, @Res({ passthrough: true }) response: Response): Promise<ResponseBody> {
     const result = await this.User.checkEmailAndPassword(body.email, body.password);
@@ -58,8 +65,8 @@ export class UserController {
   })
   @ApiBody(UserLoginDTO)
   @ApiHeader({
-    name: 'bearerAuth',
-    description: 'Bearer Token',
+    name: 'bearerauth',
+    description: 'Bearer Token - add `Bearer` at start of token',
     required: true,
     schema: {
       type: 'string',
