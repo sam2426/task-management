@@ -47,6 +47,8 @@ export class TaskController {
   @Post('create')
   @ApiOperation({
     summary: 'Create a task',
+    description:
+      'data to be passed in the body - `title` is title of the task; `description` is extra description of the task; `targetCompletionAt` is the date-time at which the user targets to complete the task for eg: `"2024-02-17T00:06:03.346Z"`',
   })
   @ApiBody(TaskCreateDTO)
   async createTask(
@@ -60,23 +62,31 @@ export class TaskController {
   }
 
   @Get('search')
-  @ApiOperation({ summary: 'Search all Tasks. Can be used along with searching, sorting, filtering' })
+  @ApiOperation({
+    summary: 'Search all Tasks. Can be used along with searching, sorting, filtering',
+    description:
+      'along with `select`, `sort`, `limit`, `page`, normal fields can also be used to query the tasks; One such example of querying the app is:  `localhost:3000/task/search?title=cleaning&select=title,description&sort=-title&limit=5&page=1` title=cleaning is check from db, but rest of them are updating the search query',
+  })
   @ApiQuery({
     name: 'select',
     description: 'mention here the fields to be selected in the output',
+    required: false,
   })
   @ApiQuery({
     name: 'sort',
     description:
       'add sorting according to some field. for eg: sort=-title sorts according to title in descending order, sort=title sorts in ascending order',
+    required: false,
   })
   @ApiQuery({
     name: 'page',
     description: 'used for pagination, enter the page number for which data required. default = 0',
+    required: false,
   })
   @ApiQuery({
     name: 'limit',
-    description: 'used for pagination, enter the limit of records to be sent in one page',
+    description: 'used for pagination, enter the limit of records to be sent in one page. default = 100',
+    required: false,
   })
   async searchTasks(
     @Query() query: Record<whereCustomFilter, any>,
@@ -87,12 +97,14 @@ export class TaskController {
     const removeFields = ['select', 'sort', 'page', 'limit'];
     removeFields.forEach((param) => delete reqQuery[param]);
 
-    const selectFields = {};
+    let selectFields = null;
     if (query.select) {
       const selectProps = (<string>query.select).split(',').map((field) => field.trim());
+      const selectedProps = {};
       selectProps.forEach((prop) => {
-        selectFields[prop] = true;
+        selectedProps[prop] = true;
       });
+      selectFields = selectedProps;
     }
 
     const sortFields = {};
@@ -132,7 +144,10 @@ export class TaskController {
     name: 'id',
     description: 'Task Id',
   })
-  @ApiOperation({ summary: 'Get details of a single Task' })
+  @ApiOperation({
+    summary: 'Get details of a single Task',
+    description: 'Get the details of one task along with owner',
+  })
   async searchOne(@Param('id') taskId: string, @Res({ passthrough: true }) response: Response): Promise<ResponseBody> {
     const data = await this.Task.getTaskById(Number(taskId));
     response.status(HttpStatus.OK);
@@ -144,13 +159,17 @@ export class TaskController {
     name: 'id',
     description: 'Task Id',
   })
+  @ApiOperation({
+    summary: 'Update the task',
+    description: 'Update the task for any field',
+  })
   async updateTask(
     @Param('id') id: string,
     @Body() body: updateRequestDTO,
     @Res({ passthrough: true }) response: Response,
   ): Promise<ResponseBody> {
     const ownerId = response.locals.tokenData.id;
-    const data = await this.Task.updateTask({ id: Number(id), ownerId }, { ...body });
+    const data = await this.Task.updateTask({ id: Number(id), ownerId, isDeleted: false }, { ...body });
     response.status(HttpStatus.OK);
     return { message: 'Task updated.', data };
   }
@@ -160,9 +179,13 @@ export class TaskController {
     name: 'id',
     description: 'Task Id',
   })
+  @ApiOperation({
+    summary: 'Marks the task as complete by id.',
+    description: 'The tasks in the db can be marked as complete.',
+  })
   async completeTask(@Param('id') id: string, @Res({ passthrough: true }) response: Response): Promise<ResponseBody> {
     const ownerId = response.locals.tokenData.id;
-    const data = await this.Task.updateTask({ id: Number(id), ownerId }, { isCompleted: true });
+    const data = await this.Task.updateTask({ id: Number(id), ownerId, isDeleted: false }, { isCompleted: true });
     response.status(HttpStatus.OK);
     return { message: `Task ${data.id} marked completed.` };
   }
@@ -171,6 +194,10 @@ export class TaskController {
   @ApiParam({
     name: 'id',
     description: 'Task Id',
+  })
+  @ApiOperation({
+    summary: 'Delete a task',
+    description: 'Soft deleting a task by id.',
   })
   async deleteTask(@Param('id') id: string, @Res({ passthrough: true }) response: Response): Promise<ResponseBody> {
     const ownerId = response.locals.tokenData.id;

@@ -17,7 +17,6 @@ export class UserService {
   }
 
   async createUserService(userData: Prisma.UserCreateInput): Promise<string> {
-    console.log(userData);
     try {
       const user = await this.findUserService({ email: userData.email });
       if (user) {
@@ -33,7 +32,6 @@ export class UserService {
       await this.prisma.user.create({ data: finalUserData });
       return 'User Registered Successfully.';
     } catch (error) {
-      console.log(error);
       throw { status: HttpStatus.INTERNAL_SERVER_ERROR, error: 'User registeration failed.' };
     }
   }

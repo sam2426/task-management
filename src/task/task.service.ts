@@ -34,7 +34,7 @@ export class TaskService {
   async getTaskById(id: number): Promise<Task | null> {
     try {
       const task = await this.prisma.task.findUnique({
-        where: { id },
+        where: { id, isDeleted: false },
         include: {
           owner: {
             select: {
