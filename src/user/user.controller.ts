@@ -2,6 +2,8 @@ import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Res, UseIntercep
 import { Response } from 'express';
 import { UserService } from './user.service';
 import { TransformerInterceptor } from 'src/common/helpers';
+import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { UserLoginDTO, UserRegisterDTO } from './user.swagger.dto';
 
 type ResponseBody = {
   message: string;
@@ -10,46 +12,36 @@ type ResponseBody = {
 
 @Controller('user')
 @UseInterceptors(TransformerInterceptor)
+@ApiTags('User')
 export class UserController {
   constructor(private readonly User: UserService) {}
 
   @Post('signup')
+  @ApiOperation({ summary: 'register a user' })
+  @ApiBody(UserRegisterDTO)
   async signup(@Body() body: any, @Res({ passthrough: true }) response: Response): Promise<ResponseBody> {
     const result = await this.User.createUserService(body);
     response.status(HttpStatus.CREATED);
     return { message: result };
-
-    // {
-    //   "email": "sam@gm.com",
-    //   "password": "123",
-    //   "name": "sam"
-    // }
-    // {
-    //   "success": true,
-    //   "message": "User Registered Successfully."
-    // }
-    // {
-    //   "success": false,
-    //   "error": "User registeration failed."
-    // }
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Login as a user' })
+  @ApiBody(UserLoginDTO)
   async login(@Body() body: any, @Res({ passthrough: true }) response: Response): Promise<ResponseBody> {
     const result = await this.User.checkEmailAndPassword(body.email, body.password);
     response.status(HttpStatus.OK);
     return { message: 'Login Successful', data: { token: result } };
     // in login response also pass name and email.
-    // {
-    //   "success": true,
-    //   "message": "Login Successful",
-    //   "data": {
-    //     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJzYW1AZ20uY29tIiwiaWF0IjoxNzA3OTU4MzY5LCJleHAiOjE3MDgwNDQ3NjksInN1YiI6IlVUIn0.Y2Ubq93jNETHwxT0nIgJrTWU1AUwELW9hXhIOsa7NgI"
-    //   }
-    // }
   }
 
   @Get('forgot-password/:email')
+  @ApiParam({
+    name: 'email',
+  })
+  @ApiOperation({
+    summary: 'This endpoint generates a token valid for 1 minute, using which we can update the password.',
+  })
   async checkEmail(
     @Param('email') email: string,
     @Res({ passthrough: true }) response: Response,
@@ -60,6 +52,20 @@ export class UserController {
   }
 
   @Patch('update-password')
+  @ApiOperation({
+    summary:
+      'This endpoint is used to change the password. To be used along with the token generated from the `user/forgot-password/:email endpoint`',
+  })
+  @ApiBody(UserLoginDTO)
+  @ApiHeader({
+    name: 'bearerAuth',
+    description: 'Bearer Token',
+    required: true,
+    schema: {
+      type: 'string',
+      format: 'Bearer <token>',
+    },
+  })
   async updatePassword(@Body() body: any, @Res({ passthrough: true }) response: Response): Promise<ResponseBody> {
     const result = await this.User.updatePassword(body.email, body.password);
     response.status(HttpStatus.OK);

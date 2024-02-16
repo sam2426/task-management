@@ -6,7 +6,7 @@ import { JwtService } from './jwt.service';
 export class AuthMiddleware implements NestMiddleware {
   constructor(private readonly jwt: JwtService) {}
   async use(req: Request, res: Response, next: NextFunction) {
-    const authHeader = req.headers['authorization'];
+    const authHeader = req.headers['authorization'] ?? (req.headers['bearerAuth'] as string);
     if (!authHeader) {
       return res.status(401).json({ success: false, message: 'Unauthorized - No Bearer token provided' });
     }

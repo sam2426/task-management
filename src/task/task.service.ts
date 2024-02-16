@@ -35,6 +35,15 @@ export class TaskService {
     try {
       const task = await this.prisma.task.findUnique({
         where: { id },
+        include: {
+          owner: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+        },
       });
       return task;
     } catch (error) {
