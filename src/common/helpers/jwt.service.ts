@@ -7,7 +7,7 @@ type tokenPayload = {
 };
 
 // msg: create an env variable for secret
-const secret = 'kjdnfaljnsaknsdansd';
+const secret = process.env.jwtSecret;
 
 @Injectable()
 export class JwtService {
