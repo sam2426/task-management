@@ -13,6 +13,14 @@
   <strong style="font-size: 4em;">Postgres + Nest.js + Docker</strong>
 </p>
 
+## Deployment
+The Application has been deployed on [RailwayApp](https://railway.app/). 
+
+
+Visit the swagger documentation at https://daffy-songs-production.up.railway.app/api
+
+The image used for the deployment is on https://hub.docker.com/r/sam2426/task-management
+
 ## Description
 
 Welcome to the Book-Keeper Service project! This backend application, built with [Nest.js](https://github.com/nestjs/nest) and [PostgreSQL](https://www.postgresql.org/docs/14/intro-whatis.html), provides a comprehensive book-keeping solution. Users can manage multiple posts associated with their accounts, creating a seamless experience for organizing and tracking various bookkeeping entries.
@@ -24,7 +32,6 @@ Welcome to the Book-Keeper Service project! This backend application, built with
 
 - **Docker:** A platform that enables developers to automate the deployment of applications inside lightweight, portable containers.
 
-- **pgAdmin4:** A web-based administration tool for PostgreSQL databases that simplifies database management tasks.
 
 ## Getting Started
 
@@ -35,39 +42,15 @@ Follow the steps below to set up and run the project locally on your machine:
 ## Installation
 
 ```bash
-$ git clone https://github.com/sam2426/nest-pg-proj.git
+$ git clone https://github.com/sam2426/task-management.git
 ```
 
-## Running the app
-
-```bash
-# Navigate to the project directory
-cd nest-pg-proj
-
-# Run Docker Compose
-
-docker-compose up -d
-```
+build and run docker app
 
 ## Testing the Application
 
 Open Swagger Documentation at - http://localhost:3000/api
 
-Open PgAdmin - http://localhost:5050/login
-
-```
-username: admin@admin.com
-pass: pgadmin4
-```
-
-## Configuring DB Connection in pgAdmin
-
-1. Go to servers > Register > Server
-2. Enter any name in the General Section, say: "Postgres-Docker"
-3. Goto Connection Tab, and enter the following details:
-   ![Connection](./imgs/Screenshot-connection.png)
-4. Click on save
-5. On password prompt enter: `mysecretpassword`
 
 ## Stay in touch
 
