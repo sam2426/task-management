@@ -14,7 +14,7 @@ CREATE TABLE "Task" (
     "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
-    "completed" BOOLEAN DEFAULT false,
+    "isCompleted" BOOLEAN DEFAULT false,
     "ownerId" INTEGER NOT NULL,
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "targetCompletionAt" TIMESTAMP(3) NOT NULL,

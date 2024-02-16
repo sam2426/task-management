@@ -23,7 +23,7 @@ model Task {
   id                  Int       @default(autoincrement()) @id
   title               String
   description         String?
-  completed           Boolean?  @default(false)
+  isCompleted           Boolean?  @default(false)
   owner               User      @relation(fields: [ownerId], references: [id])
   ownerId             Int
   isDeleted           Boolean   @default(false)

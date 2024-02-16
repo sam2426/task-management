@@ -39,7 +39,7 @@ export class UserController {
     const result = await this.User.checkEmailAndPassword(body.email, body.password);
     response.status(HttpStatus.OK);
     return { message: 'Login Successful', data: { token: result } };
-
+    // in login response also pass name and email.
     // {
     //   "success": true,
     //   "message": "Login Successful",
